@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var session = require('express-session');
 var flash = require('connect-flash');
+var MongoDBStore = require('connect-mongodb-session')(session);
 
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -34,9 +35,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ 
   secret:"foxes",
-  resave: false,
+  resave: true,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: true },
+  store : new MongoDBStore(
+    {
+      url: 'mongodb://localhost/loginSession',
+      collection: 'sessions'
+    })
 }));
 app.use(passport.initialize());
 app.use(passport.session());
