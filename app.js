@@ -5,6 +5,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var passport = require('passport');
+var session = require('express-session');
+var flash = require('connect-flash');
+
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost/loginSession", {
@@ -12,6 +15,7 @@ mongoose.connect("mongodb://localhost/loginSession", {
   reconnectTries: Number.MAX_VALUE,
   useMongoClient: true
 });
+require('./config/passport')(passport);
 
 var index = require('./routes/index');
 
@@ -28,6 +32,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ 
+  secret:"foxes",
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
 
 app.use('/', index);
 
